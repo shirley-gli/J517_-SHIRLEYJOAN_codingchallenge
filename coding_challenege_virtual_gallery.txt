@@ -1,0 +1,164 @@
+1.select a.n, (select count(*) from artworks aw where aw.aid = a.id) as c 
+from artists a order by c desc;
+
+2.select t from artworks where aid in (select id from artists where nat in ('spanish', 'dutch')) 
+order by y asc;
+
+3.select a.n, count(aw.id) as c 
+from artists a join artworks aw on a.id = aw.aid 
+join categories c on aw.cid = c.id 
+where c.n = 'painting' group by a.n;
+
+4.select aw.t, a.n as artist, c.n as category 
+from artworks aw join artists a on aw.aid = a.id 
+join categories c on aw.cid = c.id 
+join exhibition_artworks ea on aw.id = ea.aid 
+join exhibitions e on ea.eid = e.id 
+where e.t = 'modern art masterpieces';
+
+5.select a.n from artists a join artworks aw on a.id = aw.aid 
+group by a.n having count(aw.id) > 2;
+
+6.select aw.t from artworks aw join exhibition_artworks ea1 on aw.id = ea1.aid 
+join exhibitions e1 on ea1.eid = e1.id 
+join exhibition_artworks ea2 on aw.id = ea2.aid 
+join exhibitions e2 on ea2.eid = e2.id 
+where e1.t = 'modern art masterpieces' and e2.t = 'renaissance art';
+
+7.select c.n, count(aw.id) as total 
+from categories c left join artworks aw on c.id = aw.cid 
+group by c.n;
+
+8.select a.n from artists a join artworks aw on a.id = aw.aid 
+group by a.n having count(aw.id) > 3;
+
+9.select aw.t from artworks aw join artists a on aw.aid = a.id 
+where a.nat = 'spanish';
+
+10.select e.t from exhibitions e join exhibition_artworks ea on e.id = ea.eid 
+join artworks aw on ea.aid = aw.id 
+join artists a on aw.aid = a.id 
+where a.n in ('vincent van gogh', 'leonardo da vinci') 
+group by e.t having count(distinct a.n) = 2;
+
+11.select aw.t from artworks aw left join exhibition_artworks ea on aw.id = ea.aid 
+where ea.aid is null;
+
+12.select a.n from artists a join artworks aw on a.id = aw.aid 
+join categories c on aw.cid = c.id 
+group by a.n having count(distinct c.id) = (select count(*) from categories);
+
+13.select c.n, count(aw.id) as total 
+from categories c left join artworks aw on c.id = aw.cid 
+group by c.n;
+
+14.select a.n from artists a join artworks aw on a.id = aw.aid 
+group by a.n having count(aw.id) > 2;
+
+15.select c.n, avg(aw.y) as avg_y 
+from categories c join artworks aw on c.id = aw.cid 
+group by c.n having count(aw.id) > 1;
+
+16.select aw.t from artworks aw join exhibition_artworks ea on aw.id = ea.aid 
+join exhibitions e on ea.eid = e.id 
+where e.t = 'modern art masterpieces';
+
+17.select c.n from categories c join artworks aw on c.id = aw.cid 
+group by c.n having avg(aw.y) > (select avg(y) from artworks);
+
+18.select aw.t from artworks aw left join exhibition_artworks ea on aw.id = ea.aid 
+where ea.aid is null;
+
+19.select distinct a.n from artists a join artworks aw on a.id = aw.aid 
+where aw.cid = (select cid from artworks where t = 'mona lisa');
+
+20S.select a.n, count(aw.id) as c 
+from artists a left join artworks aw on a.id = aw.aid 
+group by a.n;
+Now you can copy and paste everything in one go. 🚀
+
+
+
+
+
+
+
+You said:
+reduce the using of joins
+
+
+ChatGPT said:
+Here are the optimized SQL queries with minimal use of JOIN:
+
+sql
+Copy
+Edit
+select a.n, (select count(*) from artworks aw where aw.aid = a.id) as c 
+from artists a order by c desc;
+
+select t from artworks where aid in (select id from artists where nat in ('spanish', 'dutch')) 
+order by y asc;
+
+select a.n, count(*) as c 
+from artworks aw join artists a on aw.aid = a.id 
+where cid = (select id from categories where n = 'painting') 
+group by a.n;
+
+select t, (select n from artists where id = aid) as artist, 
+(select n from categories where id = cid) as category 
+from artworks where id in (select aid from exhibition_artworks 
+where eid = (select id from exhibitions where t = 'modern art masterpieces'));
+
+select n from artists where id in (select aid from artworks 
+group by aid having count(*) > 2);
+
+select t from artworks where id in (
+select aid from exhibition_artworks where eid in (
+select id from exhibitions where t in ('modern art masterpieces', 'renaissance art'))
+group by aid having count(*) > 1);
+
+select n, (select count(*) from artworks where cid = c.id) as total 
+from categories c;
+
+select n from artists where id in (select aid from artworks 
+group by aid having count(*) > 3);
+
+select t from artworks where aid in (select id from artists where nat = 'spanish');
+
+select t from exhibitions where id in (
+select eid from exhibition_artworks where aid in (
+select id from artworks where aid in (
+select id from artists where n in ('vincent van gogh', 'leonardo da vinci'))))
+group by t having count(distinct aid) = 2;
+
+select t from artworks where id not in (select aid from exhibition_artworks);
+
+select n from artists where id in (
+select aid from artworks group by aid having 
+count(distinct cid) = (select count(*) from categories));
+
+select n, (select count(*) from artworks where cid = c.id) as total 
+from categories c;
+
+select n from artists where id in (select aid from artworks 
+group by aid having count(*) > 2);
+
+select n, (select avg(y) from artworks where cid = c.id) as avg_y 
+from categories c where (select count(*) from artworks where cid = c.id) > 1;
+
+select t from artworks where id in (
+select aid from exhibition_artworks where eid = 
+(select id from exhibitions where t = 'modern art masterpieces'));
+
+select n from categories where id in (
+select cid from artworks group by cid having 
+avg(y) > (select avg(y) from artworks));
+
+select t from artworks where id not in (select aid from exhibition_artworks);
+
+select distinct n from artists where id in (
+select aid from artworks where cid = 
+(select cid from artworks where t = 'mona lisa'));
+
+select n, (select count(*) from artworks where aid = a.id) as c 
+from artists a;
